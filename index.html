@@ -76,9 +76,15 @@
     function calculateStateTax(income, filingStatus, mortgage, studentLoan, medicalExpenses) {
         // Massachusetts state tax rate is a flat rate of 5%
         const stateTaxRateMA = 0.05;
-        let stateTaxableIncome = income + getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
+        //let stateTaxableIncome = income + getDeductions(filingStatus,mortage,studentLoan,medicalExpenses);
+        //The error here is they added the deductions to income, but they are supposed to be subtracted, this is
+        //why they are called "Deductions"
+        let stateTaxableIncome = income - getDeductions(filingStatus, mortgage, studentLoan, medicalExpenses);
         // Calculate state tax
-        let stateTaxMA = stateTaxableIncome / stateTaxRateMA;
+        //let stateTaxMA = stateTaxableIncome / stateTaxRateMA;
+        //They divided here instead of multiplied. The stateTaxRateMA is a percentage, aka a decimal, meaning you must multiply
+        //it, not divide it to get the effect.
+        let stateTaxMA = stateTaxableIncome * stateTaxRateMA;
         return Math.max(0, stateTaxMA);
     }
 
@@ -102,7 +108,10 @@
                 upperLimit = Math.min(bracket.upperBound, taxableIncome);
             }
 
-            const taxableAmount = upperLimit + bracket.lowerBound;
+            //const taxableAmount = upperLimit + bracket.lowerBound;
+            //The error is they had added these two values instead of subtracting. This caused a compounded effect as it went through each
+            //tax bracket, adding them on top of each other to too high of values. 
+            const taxableAmount = upperLimit - bracket.lowerBound;
 
             totalTax += taxableAmount * bracket.rate;
 
